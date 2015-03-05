@@ -1,11 +1,11 @@
 {-# LANGUAGE ConstraintKinds, FlexibleContexts, MultiParamTypeClasses #-}
 {-# LANGUAGE NoMonomorphismRestriction, RankNTypes                    #-}
-module Text.Japandoc.Lens (_Str) where
-import Control.Lens       ()
-import Control.Lens       (Prism, prism)
-import Data.Bifunctor     (Bifunctor)
+module Text.Yapan.Lens (_Str) where
+import Control.Lens    ()
+import Control.Lens    (Prism, prism)
+import Data.Bifunctor  (Bifunctor)
 import Data.OpenUnion2
-import Text.Japandoc.Base
+import Text.Yapan.Base
 
 _Str :: (Member Str is, Subset is is', Subset b b', All Bifunctor is', All Bifunctor b')
       => Prism (Inline b is) (Inline b' is') String String

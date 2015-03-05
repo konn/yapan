@@ -1,11 +1,11 @@
 {-# LANGUAGE PatternSynonyms, ViewPatterns #-}
-module Text.Japandoc.Patterns 
+module Text.Yapan.Patterns 
        (pattern Block,
         pattern Inline,
         pattern Str,
         pattern Emph,
         pattern Header) where
-import Text.Japandoc.Base
+import Text.Yapan.Base
 import Data.OpenUnion2
 
 pattern Block  a <- Block'  (prj -> Just a)
