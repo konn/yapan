@@ -3,7 +3,7 @@
 {-# LANGUAGE MultiParamTypeClasses, NoMonomorphismRestriction              #-}
 {-# LANGUAGE PatternSynonyms, PolyKinds, ScopedTypeVariables, TypeFamilies #-}
 {-# LANGUAGE TypeOperators, UndecidableInstances                           #-}
-module Text.Japandoc.Base
+module Text.Yapan.Base
        ( -- * Basic Types
          BlockF(..), Block, InlineF(..), Inline,
          cataB, cataI, embedB, embedI,
