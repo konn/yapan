@@ -25,6 +25,7 @@ library
                      , Text.Yapan.Base
                      , Data.OpenUnion2
                      , Data.Bifunctor.Free
+                     , Data.Bifunctor.TH
   if flag(patterns) && impl(ghc >= 7.8.3)
     exposed-modules:   Text.Yapan.Patterns
   -- other-modules:       
@@ -36,6 +37,8 @@ library
                      , kan-extensions >= 4.1.1
                      , prelude-extras >= 0.4
                      , profunctors >= 4.2.0.1
+                     , syb >= 0.4.1
+                     , template-haskell >= 2.9
                      , transformers   >= 0.3
                      , type-natural >= 0.2.3.1
   hs-source-dirs:      src
