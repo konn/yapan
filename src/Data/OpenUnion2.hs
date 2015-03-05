@@ -6,7 +6,7 @@
 {-# LANGUAGE ScopedTypeVariables, TemplateHaskell, TypeFamilies           #-}
 {-# LANGUAGE TypeOperators, UndecidableInstances                          #-}
 module Data.OpenUnion2
-       (Subset, Union2, embed, decomp, inj, prj, lift,
+       (Element, Subset, Union2, embed, decomp, inj, prj, lift,
         extend, withWitness, withWitnesses, Refl(..))
        where
 import           Control.Arrow            ((+++), (>>>))
@@ -25,6 +25,7 @@ newtype K2 a b h = K2 { runK2 :: h a b }
 newtype Union2 hs a b = Union2 { runUnion2 :: K2 a b :| hs }
 
 type Subset xs ys = Include ys xs
+type Element x xs = Member xs x
 
 withWitnesses :: Forall c xs => proxy c -> (E.Comp Dict c) :* xs
 withWitnesses pxy = E.htabulateFor pxy $ \_ -> E.Comp Dict
