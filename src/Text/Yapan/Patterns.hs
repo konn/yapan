@@ -4,7 +4,9 @@ module Text.Yapan.Patterns
         pattern Inline,
         pattern Str,
         pattern Emph,
-        pattern Header) where
+        pattern Header,
+        pattern Plain,
+        pattern Para) where
 import Text.Yapan.Base
 import Data.OpenUnion2
 
@@ -15,3 +17,5 @@ pattern Str  s <- Inline (Str' s)
 pattern Emph e <- Inline (Emph' e)
 
 pattern Header i hs <- Block (Header' i hs)
+pattern Plain  is   <- Block (Plain' is)
+pattern Para   is   <- Block (Para' is)
