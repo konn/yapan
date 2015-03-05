@@ -23,6 +23,7 @@ source-repository head
 library
   exposed-modules:     Text.Yapan
                      , Text.Yapan.Base
+                     , Text.Yapan.Lens
                      , Data.OpenUnion2
                      , Data.Bifunctor.Free
                      , Data.Bifunctor.TH
