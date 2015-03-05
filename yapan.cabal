@@ -32,7 +32,6 @@ library
   build-depends:       base >=4 && <5
                      , bifunctors   >= 4.1
                      , constraints >= 0.4
-                     , extensible >= 0.2.3
                      , kan-extensions >= 4.1.1
                      , lens >= 4.7
                      , prelude-extras >= 0.4
