@@ -26,11 +26,12 @@ library
                      , Text.Yapan.JSON
                      , Text.Yapan.Lens
                      , Data.OpenUnion2
+                     , Data.OpenUnion2.Lens
                      , Data.Bifunctor.Free
                      , Data.Bifunctor.TH
   if flag(patterns) && impl(ghc >= 7.8.3)
     exposed-modules:   Text.Yapan.Patterns
-  -- other-modules:       
+  other-modules:       Text.Yapan.Internal
   -- other-extensions:    
   build-depends:       aeson >= 0.6.2.1
                      , base >=4 && <5
@@ -41,6 +42,7 @@ library
                      , prelude-extras >= 0.4
                      , profunctors >= 4.2.0.1
                      , syb >= 0.4.1
+                     , tagged >= 0.7.2
                      , template-haskell >= 2.9
                      , transformers   >= 0.3
                      , type-natural >= 0.2.3.1
