@@ -6,16 +6,22 @@
 {-# LANGUAGE ScopedTypeVariables, TemplateHaskell, TypeFamilies           #-}
 {-# LANGUAGE TypeOperators, UndecidableInstances                          #-}
 module Data.OpenUnion2
-       (Element, Subset, Union2, embed, decomp, inj, injWith, prj, lift,
+       (Element, Subset, Union2, K2(..), embed, decomp, inj, injWith, prj, lift,
         extend, withWitness, withWitnesses, super)
        where
+import Text.Yapan.Internal
+
+import           Control.Applicative      (Const (..))
 import           Control.Arrow            ((+++), (>>>))
 import           Data.Bifunctor           (Bifunctor (..))
 import           Data.Constraint          (Dict (..))
 import           Data.Extensible          ((:*), (:|) (..), Forall, Include)
 import           Data.Extensible          (Member, Membership, (<:|))
+import           Data.Extensible          (picked)
 import qualified Data.Extensible          as E
 import qualified Data.Extensible.Internal as E
+import           Data.Monoid              (First (..))
+import           Data.Profunctor.Unsafe   (( #. ))
 import           Data.Proxy               (Proxy (..))
 import           Prelude.Extras           (Eq2 (..), Ord2 (..), Show2 (..))
 
@@ -77,8 +83,10 @@ inj f = Union2 $ E.embed $ K2 f
 injWith :: Membership hs h -> h a b -> Union2 hs a b
 injWith mem f = Union2 $ E.UnionAt mem (K2 f)
 
-prj :: Member hs h => Union2 hs a b -> Maybe (h a b)
-prj = undefined
+prj :: (Member hs h) => Union2 hs a b -> Maybe (h a b)
+prj (Union2 u) =
+  getFirst $! getConst $!
+  picked (Const #. First #. Just #. runK2) $! u
 
 decomp :: Union2 (h ': hs) a b -> Either (Union2 hs a b) (h a b)
 decomp = runUnion2 >>>(Right <:| Left) >>> Union2 +++ runK2

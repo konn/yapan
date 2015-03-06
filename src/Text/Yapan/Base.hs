@@ -28,10 +28,6 @@ import Data.Extensible   (Membership)
 import Data.OpenUnion2
 import Prelude.Extras    (Eq2 (..), Ord2 (..), Read2 (..), Show2 (..))
 
-type family Map f xs where
-  Map f '[]       = '[]
-  Map f (p ': ps) = f p ': Map f ps
-
 newtype BlockF  b i = Block' { runBlockF :: b (BlockF b i) (InlineF b i) }
 type Block  bs is = BlockF (Union2 bs) (Union2 is)
 

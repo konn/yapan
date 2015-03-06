@@ -5,6 +5,7 @@
 {-# OPTIONS_GHC -fwarn-unused-binds #-}
 module Text.Yapan.Lens
        ( -- * Prisms for standard elements
+         _Block, _Inline,
          YapanPrismic,
          BlockPrism, BlockPrism', InlinePrism, InlinePrism',
          InlineMonoPrism, InlineMonoPrism',
@@ -19,23 +20,14 @@ module Text.Yapan.Lens
          mkGenPrism, mkGenPrism', mkPrismI, mkPrismI',
          mkPrismB, mkPrismB'
        ) where
-import Control.Applicative (Applicative)
-import Control.Applicative (pure)
-import Data.Bifunctor      (Bifunctor)
-import Data.Extensible     (Forall)
 import Data.OpenUnion2
-import Data.Profunctor     (Choice)
-import Data.Profunctor     (right')
-import Data.Profunctor     (dimap)
-import Data.Proxy          (Proxy (..))
+import Data.OpenUnion2.Lens
 import Text.Yapan.Base
+import Text.Yapan.Internal
 
-type Prism s t a b = forall p f. (Choice p, Applicative f) => p a (f b) -> p s (f t)
-
-prism :: (b -> t) -> (s -> Either t a) -> Prism s t a b
-prism bt seta = dimap seta (either pure (fmap bt)) . right'
-
-type Prism' s a = Prism s s a a
+import Data.Bifunctor  (Bifunctor)
+import Data.Extensible (Forall)
+import Data.Proxy      (Proxy (..))
 
 type YapanPrismic bs is bs' is' =
   (Forall Bifunctor bs', Forall Bifunctor is', Subset bs bs', Subset is is')
@@ -61,8 +53,20 @@ type InlineMonoPrism' i a   = Mono' InlinePrism' i a
 type BlockMonoPrism  i a b = Mono BlockPrism i a b
 type BlockMonoPrism' i a   = Mono' BlockPrism' i a
 
-prism' :: (b -> s) -> (s -> Maybe a) -> Prism s s a b
-prism' bs sma = prism bs (\s -> maybe (Left s) Right (sma s))
+_Block :: Iso (Block bs is) (Block bs' is')
+              (Union2 bs (Block bs is) (Inline bs is))
+              (Union2 bs' (Block bs' is') (Inline bs' is'))
+_Block = iso runBlockF Block'
+
+_Inline :: Iso (Inline bs is) (Inline bs' is')
+              (Union2 is  (Block bs is) (Inline bs is))
+              (Union2 is' (Block bs' is') (Inline bs' is'))
+_Inline = iso runInlineF Inline'
+
+subsetB :: (Forall Bifunctor bs', Forall Bifunctor is',
+             Subset bs bs', Subset is is')
+        => Prism' (Block bs' is') (Block bs is)
+subsetB = prism' embedB _a
 
 mkGenPrism :: (Subset is is', Subset bs bs')
            => (i (Block bs' is') (Inline bs' is') -> container (Union2 bs') (Union2 is'))
@@ -108,6 +112,9 @@ mkPrismB' :: (Element b bs)
           -> (b (Block bs is) (Inline bs is) -> a)
           -> Prism' (Block bs is) a
 mkPrismB' = mkGenPrism' block prjB
+
+_Str0 :: Prism (Str b i) (Str b' i') String String
+_Str0 = prism Str' $ \case Str' a -> Right a
 
 _Str :: InlineMonoPrism Str String String
 _Str = mkPrismI Str' $ \case Str' a -> a
