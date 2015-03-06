@@ -9,7 +9,8 @@ module Text.Yapan.Patterns
         pattern Para,
         pattern RawBlock,
         pattern List,
-        pattern RawInline
+        pattern RawInline,
+        pattern DefinitionList
        ) where
 import Text.Yapan.Base
 import Data.OpenUnion2
@@ -26,3 +27,4 @@ pattern Plain    is   <- Block (Plain' is)
 pattern Para     is   <- Block (Para' is)
 pattern RawBlock f s  <- Block (RawBlock' f s)
 pattern List tp bss   <- Block (List' tp bss)
+pattern DefinitionList s  <- Block (DefinitionList' s)

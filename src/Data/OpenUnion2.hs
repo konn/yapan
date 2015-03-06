@@ -6,8 +6,8 @@
 {-# LANGUAGE ScopedTypeVariables, TemplateHaskell, TypeFamilies           #-}
 {-# LANGUAGE TypeOperators, UndecidableInstances                          #-}
 module Data.OpenUnion2
-       (Element, Subset, Union2, embed, decomp, inj, prj, lift,
-        extend, withWitness, withWitnesses, Refl(..))
+       (Element, Subset, Union2, embed, decomp, inj, injWith, prj, lift,
+        extend, withWitness, withWitnesses, super)
        where
 import           Control.Arrow            ((+++), (>>>))
 import           Data.Bifunctor           (Bifunctor (..))
@@ -32,6 +32,10 @@ withWitnesses pxy = E.htabulateFor pxy $ \_ -> E.Comp Dict
 
 withWitness :: Forall c xs => proxy c -> Membership xs x -> Dict (c x)
 withWitness pxy = E.getComp . E.hindex (withWitnesses pxy)
+
+super :: forall proxy x xs ys. (Member xs x, Include ys xs)
+      => proxy xs -> Membership ys x
+super _ = E.hindex E.inclusion (E.membership :: Membership xs x)
 
 instance Forall Show2 fs => Show2 (Union2 fs) where
   showsPrec2 d (Union2 (UnionAt mem (K2 f)))  =
@@ -70,6 +74,9 @@ instance Forall Bifunctor ps => Bifunctor (Union2 ps) where
 inj :: Member hs h => h a b -> Union2 hs a b
 inj f = Union2 $ E.embed $ K2 f
 
+injWith :: Membership hs h -> h a b -> Union2 hs a b
+injWith mem f = Union2 $ E.UnionAt mem (K2 f)
+
 prj :: Member hs h => Union2 hs a b -> Maybe (h a b)
 prj = undefined
 
@@ -84,12 +91,6 @@ lift f x =
   case prj x of
     Just a -> inj $ f a
     Nothing -> x
-
-class Refl xs where
-  refl :: Membership xs :* xs
-
-instance Refl '[] where
-  refl = E.Nil
 
 extend :: Union2 fs a b -> Union2 (f ': fs) a b
 extend (Union2 (UnionAt mem f)) =

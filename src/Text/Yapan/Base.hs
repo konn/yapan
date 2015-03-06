@@ -8,14 +8,15 @@ module Text.Yapan.Base
        ( -- * Basic Types
          BlockF(..), Block, InlineF(..), Inline,
          cataB, cataI, embedB, embedI,
-         -- ** Smart constructors
-         block, inline,
+         -- ** Smart constructors & destructors
+         block, blockWith, inline, inlineWith,
+         prjB, prjI, includeI, includeB,
          -- * Standard Grammars
          -- ** Blocks
          Header(..), header, Plain(..), plain,
          Para(..), para, Format(..), RawBlock(..),
          rawBlock, List(..), ListType(..), NumberStyle(..),
-         list,
+         list, DefinitionList(..), definitionList,
          -- ** Inlines
          Str (..), str,
          Emph(..), emph, RawInline(..), rawInline
@@ -23,6 +24,7 @@ module Text.Yapan.Base
 import Data.Bifunctor    (Bifunctor (..))
 import Data.Bifunctor.TH (deriveBifunctor)
 import Data.Extensible   (Forall)
+import Data.Extensible   (Membership)
 import Data.OpenUnion2
 import Prelude.Extras    (Eq2 (..), Ord2 (..), Read2 (..), Show2 (..))
 
@@ -62,6 +64,19 @@ embedI :: (Forall Bifunctor is', Forall Bifunctor bs',
        => Inline bs is -> Inline bs' is'
 embedI = cataI embed embed
 
+{-
+interpBB :: (Bifunctor b, Bifunctor (Union2 bs), Bifunctor is)
+        => (b (BlockF (Union2 bs) is) (InlineF (Union2 bs) is)
+            -> Union2 bs (BlockF (Union2 (b ': bs)) is) (InlineF (Union2 (b ': bs)) is))
+        -> BlockF (Union2 (b ': bs)) is -> BlockF (Union2 bs) is
+interpBB ints = cataB go id
+  where
+    go a =
+      case decomp a of
+        Left  c -> c
+        Right b -> ints b
+-}
+
 -- | Smart constructor for @'Block'@. Most typical type is:
 --
 -- @
@@ -70,6 +85,9 @@ embedI = cataI embed embed
 block :: Element b bs => b (BlockF (Union2 bs) i) (InlineF (Union2 bs) i) -> BlockF (Union2 bs) i
 block = Block' . inj
 
+blockWith :: Membership bs b -> b (BlockF (Union2 bs) i) (InlineF (Union2 bs) i) -> BlockF (Union2 bs) i
+blockWith = (Block' .) . injWith
+
 -- | Smart constructor for @'Inline'@. Most typical type is:
 --
 -- @
@@ -77,6 +95,25 @@ block = Block' . inj
 -- @
 inline :: Element t ts => t (BlockF b (Union2 ts)) (InlineF b (Union2 ts)) -> InlineF b (Union2 ts)
 inline = Inline' . inj
+
+inlineWith :: Membership ts t -> t (BlockF b (Union2 ts)) (InlineF b (Union2 ts)) -> InlineF b (Union2 ts)
+inlineWith mem = Inline' . injWith mem
+
+includeI :: (Element t xs, Subset xs ts)
+           => proxy xs -> t (BlockF b (Union2 ts)) (InlineF b (Union2 ts)) -> InlineF b (Union2 ts)
+includeI pxy = inlineWith (super pxy)
+
+includeB :: (Element t xs, Subset xs ts)
+         => proxy xs -> t (BlockF (Union2 ts) i) (InlineF (Union2 ts) i) -> BlockF (Union2 ts) i
+includeB pxy = blockWith (super pxy)
+
+prjI :: Element h hs
+     => InlineF b (Union2 hs) -> Maybe (h (BlockF b (Union2 hs)) (InlineF b (Union2 hs)))
+prjI = prj . runInlineF
+
+prjB :: Element h hs
+     => BlockF (Union2 hs) is -> Maybe (h (BlockF (Union2 hs) is) (InlineF (Union2 hs) is))
+prjB = prj . runBlockF
 
 instance (Show2 f, Show2 g) => Show (BlockF f g) where
   showsPrec d (Block' f) = showsPrec2 d f
@@ -189,7 +226,7 @@ instance Ord2 Emph
 instance Read2 Emph
 deriveBifunctor ''Emph
 
-emph :: Element Emph is =>  [InlineF bs (Union2 is)] -> InlineF bs (Union2 is)
+emph :: Element Emph is => [InlineF bs (Union2 is)] -> InlineF bs (Union2 is)
 emph = inline . Emph'
 
 data RawInline is bs = RawInline' Format String
@@ -204,7 +241,7 @@ deriveBifunctor ''RawInline
 rawInline :: Element RawInline is => Format -> String -> InlineF b (Union2 is)
 rawInline = (inline .) . RawInline'
 
-data DefinitionList bs is = DefinitionList [([is], [[bs]])]
+data DefinitionList bs is = DefinitionList' [([is], [[bs]])]
                             deriving (Read, Show, Eq, Ord)
 
 instance Eq2 DefinitionList
@@ -212,3 +249,8 @@ instance Show2 DefinitionList
 instance Ord2 DefinitionList
 instance Read2 DefinitionList
 deriveBifunctor ''DefinitionList
+
+definitionList :: Element DefinitionList bs
+               => [([InlineF (Union2 bs) is], [[BlockF (Union2 bs) is]])]
+               -> BlockF (Union2 bs) is
+definitionList = block . DefinitionList'

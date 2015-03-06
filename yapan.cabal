@@ -23,6 +23,7 @@ source-repository head
 library
   exposed-modules:     Text.Yapan
                      , Text.Yapan.Base
+                     , Text.Yapan.JSON
                      , Text.Yapan.Lens
                      , Data.OpenUnion2
                      , Data.Bifunctor.Free
@@ -31,7 +32,8 @@ library
     exposed-modules:   Text.Yapan.Patterns
   -- other-modules:       
   -- other-extensions:    
-  build-depends:       base >=4 && <5
+  build-depends:       aeson >= 0.6.2.1
+                     , base >=4 && <5
                      , bifunctors   >= 4.1
                      , constraints >= 0.4
                      , extensible >= 0.3
